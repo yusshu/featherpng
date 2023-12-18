@@ -3,4 +3,4 @@ pngtastic.iml
 bin
 build
 target
-
+/.gradle/
