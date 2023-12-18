@@ -1,19 +1,8 @@
-## Pngtastic
+## featherpng
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](license.txt)
 
-#### A pure Java API for dealing with PNG images
-
-Pngtastic is PNG for Java. Just one small jar with no dependencies. It doesn't rely on AWT, so it can be used in restrictive environments like Google App Engine (and probably Android, but haven't tried).
-
-#### The currently supported operations are:
-- File size optimization
-- PNG image layering
-
-#### Available in Maven
-    <dependency>
-        <groupId>com.github.depsypher</groupId>
-        <artifactId>pngtastic</artifactId>
-        <version>1.7</version>
-    </dependency>
+`featherpng` is a PNG image optimization and manipulation library for Java 8+,
+based on the [pngtastic](https://github.com/depsypher/pngtastic) library.
 
 #### New: Support for Zopfli compression! (Not recommended for production: See Issue #7)
 The latest code adds the ability to optimize png images using the new [zopfli](https://code.google.com/p/zopfli/) deflate compression algorithm. The java port is based heavily on [this](https://github.com/eustas/CafeUndZopfli).
