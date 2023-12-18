@@ -35,14 +35,14 @@ public class PngReader extends PngProcessor {
 			throw new PngException("not supported");
 		}
 
-		final Iterator<PngChunk> itChunks = image.getChunks().iterator();
+		final Iterator<PngChunk> itChunks = image.chunks().iterator();
 		final PngChunk chunk = processHeadChunks(null, false, itChunks);
 
 		// collect image data chunks
 		final PngByteArrayOutputStream inflatedImageData = getInflatedImageData(chunk, itChunks);
 
-		final long width = image.getWidth();
-		final long height = image.getHeight();
+		final long width = image.width();
+		final long height = image.height();
 		final int scanlineLength = (int) (Math.ceil(width * image.getSampleBitCount() / 8F)) + 1;
 
 		final List<byte[]> originalScanlines = (image.getInterlace() == 1)

@@ -99,7 +99,7 @@ class PngReaderTest {
 
 	private void print(PngImage image, byte[] data) {
 		for (int i = 0; i < data.length; i += 4) {
-			if (i % (image.getWidth() * 4) == 0) {
+			if (i % (image.width() * 4) == 0) {
 				System.out.println();
 			}
 			System.out.print(String.format("%2x", data[i]));

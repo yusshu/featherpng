@@ -57,14 +57,14 @@ public class PngColorCounter extends PngProcessor {
 
 		final long start = System.currentTimeMillis();
 
-		final Iterator<PngChunk> itChunks = image.getChunks().iterator();
+		final Iterator<PngChunk> itChunks = image.chunks().iterator();
 		final PngChunk chunk = processHeadChunks(null, false, itChunks);
 
 		// collect image data chunks
 		final PngByteArrayOutputStream inflatedImageData = getInflatedImageData(chunk, itChunks);
 
-		final long width = image.getWidth();
-		final long height = image.getHeight();
+		final long width = image.width();
+		final long height = image.height();
 		final int scanlineLength = (int) (Math.ceil(width * image.getSampleBitCount() / 8F)) + 1;
 
 		final List<byte[]> originalScanlines = (image.getInterlace() == 1)
@@ -161,7 +161,7 @@ public class PngColorCounter extends PngProcessor {
 		}
 
 		if (freqThreshold > 0) {
-			final int minFreq = (int) (original.getWidth() * original.getHeight() * freqThreshold);
+			final int minFreq = (int) (original.width() * original.height() * freqThreshold);
 			for (Iterator<Map.Entry<PngPixel, Integer>> it = colors.entrySet().iterator(); it.hasNext();) {
 				final Entry<PngPixel, Integer> entry = it.next();
 				if (entry.getValue() < minFreq) {

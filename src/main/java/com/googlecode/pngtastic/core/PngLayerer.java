@@ -28,13 +28,13 @@ public class PngLayerer extends PngProcessor {
 		final PngImage result = new PngImage();
 		result.setInterlace((short) 0);
 
-		final Iterator<PngChunk> itBaseChunks = baseImage.getChunks().iterator();
+		final Iterator<PngChunk> itBaseChunks = baseImage.chunks().iterator();
 
 		final PngChunk lastBaseChunk = processHeadChunks(new PngImage(), itBaseChunks);
 		final PngByteArrayOutputStream inflatedBaseImageData = getInflatedImageData(lastBaseChunk, itBaseChunks);
 		final List<byte[]> baseImageScanlines = getScanlines(baseImage, inflatedBaseImageData);
 
-		final Iterator<PngChunk> itLayerChunks = layerImage.getChunks().iterator();
+		final Iterator<PngChunk> itLayerChunks = layerImage.chunks().iterator();
 
 		final PngChunk lastLayerChunk = processHeadChunks(result, itLayerChunks);
 		final PngByteArrayOutputStream inflatedLayerImageData = getInflatedImageData(lastLayerChunk, itLayerChunks);
@@ -56,11 +56,11 @@ public class PngLayerer extends PngProcessor {
 
 	/* */
 	private List<byte[]> getScanlines(PngImage image, PngByteArrayOutputStream inflatedImageData) {
-		final int scanlineLength = Double.valueOf(Math.ceil(Long.valueOf(image.getWidth() * image.getSampleBitCount()) / 8F)).intValue() + 1;
+		final int scanlineLength = Double.valueOf(Math.ceil(Long.valueOf(image.width() * image.getSampleBitCount()) / 8F)).intValue() + 1;
 
 		final List<byte[]> originalScanlines = (image.getInterlace() == 1)
-				? pngInterlaceHandler.deInterlace((int)image.getWidth(), (int)image.getHeight(), image.getSampleBitCount(), inflatedImageData)
-				: getScanlines(inflatedImageData, image.getSampleBitCount(), scanlineLength, image.getHeight());
+				? pngInterlaceHandler.deInterlace((int)image.width(), (int)image.height(), image.getSampleBitCount(), inflatedImageData)
+				: getScanlines(inflatedImageData, image.getSampleBitCount(), scanlineLength, image.height());
 
 		return originalScanlines;
 	}

@@ -25,7 +25,7 @@ public class PngChunkInserter {
 
 	public byte[] insert(PngImage image, PngChunk chunk) throws IOException {
 		// add it after the header chunk
-		image.getChunks().add(1, chunk);
+		image.chunks().add(1, chunk);
 
 		final ByteArrayOutputStream outputBytes = new ByteArrayOutputStream();
 		image.writeDataOutputStream(outputBytes);

@@ -52,7 +52,7 @@ public final class PngOptimizer extends PngProcessor {
 		final long optimizedFileSize = exported.length();
 		final String dataUri = (generateDataUriCss) ? pngCompressionHandler.encodeBytes(optimalBytes) : null;
 
-		results.add(new OptimizerResult(image.getFileName(), originalFileSize, optimizedFileSize, image.getWidth(), image.getHeight(), dataUri));
+		results.add(new OptimizerResult(image.getFileName(), originalFileSize, optimizedFileSize, image.width(), image.height(), dataUri));
 	}
 
 	/** */
@@ -70,17 +70,17 @@ public final class PngOptimizer extends PngProcessor {
 		final PngImage result = new PngImage();
 		result.setInterlace((short) 0);
 
-		final Iterator<PngChunk> itChunks = image.getChunks().iterator();
+		final Iterator<PngChunk> itChunks = image.chunks().iterator();
 		PngChunk chunk = processHeadChunks(result, removeGamma, itChunks);
 
 		// collect image data chunks
 		final PngByteArrayOutputStream inflatedImageData = getInflatedImageData(chunk, itChunks);
 
-		final int scanlineLength = (int)(Math.ceil(image.getWidth() * image.getSampleBitCount() / 8F)) + 1;
+		final int scanlineLength = (int)(Math.ceil(image.width() * image.getSampleBitCount() / 8F)) + 1;
 
 		final List<byte[]> originalScanlines = (image.getInterlace() == 1)
-				? pngInterlaceHandler.deInterlace((int) image.getWidth(), (int) image.getHeight(), image.getSampleBitCount(), inflatedImageData)
-				: getScanlines(inflatedImageData, image.getSampleBitCount(), scanlineLength, image.getHeight());
+				? pngInterlaceHandler.deInterlace((int) image.width(), (int) image.height(), image.getSampleBitCount(), inflatedImageData)
+				: getScanlines(inflatedImageData, image.getSampleBitCount(), scanlineLength, image.height());
 
 		// TODO: use this for bit depth reduction
 //		Map<PngPixel, Integer> colors = getColors(image, originalScanlines, 32);
@@ -135,7 +135,7 @@ public final class PngOptimizer extends PngProcessor {
 		}
 
 		// make sure we have the IEND chunk
-		final List<PngChunk> chunks = result.getChunks();
+		final List<PngChunk> chunks = result.chunks();
 		if (chunks != null && chunks.get(chunks.size() - 1).type() != PngChunk.IMAGE_TRAILER) {
 			result.addChunk(new PngChunk(PngChunk.IMAGE_TRAILER, new byte[] { }));
 		}

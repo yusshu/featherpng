@@ -26,11 +26,11 @@ public final class PngImage {
 	//      ?    P   N   G  \r  \n   ?  \n
 	public static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
-	private String fileName;
 	private final List<PngChunk> chunks = new ArrayList<>();
 
 	private long width;
 	private long height;
+	private long length;
 
 	private short bitDepth;
 	private short colorType;
@@ -85,12 +85,21 @@ public final class PngImage {
 	public PngImage() {
 	}
 
-	public String getFileName() { return this.fileName; }
+	public List<PngChunk> chunks() {
+		return this.chunks;
+	}
 
-	public List<PngChunk> getChunks() { return this.chunks; }
+	public long width() {
+		return this.width;
+	}
 
-	public long getWidth() { return this.width; }
-	public long getHeight() { return this.height; }
+	public long height() {
+		return this.height;
+	}
+
+	public long length() {
+		return this.length;
+	}
 
 	public short getBitDepth() { return this.bitDepth; }
 	public short getColorType() { return this.colorType; }
@@ -103,7 +112,6 @@ public final class PngImage {
 	public File export(String fileName, byte[] bytes) throws IOException {
 		File out = new File(fileName);
 		writeFileOutputStream(out, bytes);
-
 		return out;
 	}
 
