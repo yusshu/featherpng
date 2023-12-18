@@ -106,7 +106,7 @@ public abstract class PngProcessor {
 
 				PngChunk newChunk = new PngChunk(chunk.type(), chunk.data().clone());
 				if (chunk.type() == PngChunk.IMAGE_HEADER) {
-					newChunk.setInterlace((byte) 0);
+					newChunk.writeInterlace((byte) 0);
 				}
 				result.addChunk(newChunk);
 			}

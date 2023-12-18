@@ -76,45 +76,102 @@ public final class PngChunk {
 		return this.data.length;
 	}
 
-	/** */
-	public long getWidth() {
+	//#region IHDR properties
+	/**
+	 * Reads the 'width' property from this PNG chunk. It's
+	 * expected that this PNG chunk is a IHDR chunk.
+	 *
+	 * <p>The returned width is the image width in pixels,
+	 * zero is an invalid value.</p>
+	 *
+	 * @return the width of the image in pixels
+	 */
+	public long readWidth() {
 		return this.getUnsignedInt(0);
 	}
 
-	/** */
-	public long getHeight() {
+	/**
+	 * Reads the 'height' property from this PNG chunk. It's
+	 * expected that this PNG chunk is a IHDR chunk.
+	 *
+	 * <p>The returned height is the image height in pixels,
+	 * zero is an invalid value.</p>
+	 *
+	 * @return the height of the image in pixels
+	 */
+	public long readHeight() {
 		return this.getUnsignedInt(4);
 	}
 
-	/** */
-	public short getBitDepth() {
+	/**
+	 * Reads the bit depth for this image, which gives the number
+	 * of bits per sample or per palette index (not per pixel).
+	 *
+	 * <p>Valid values are 1, 2, 4, 8 and 16, although not all values
+	 * are allowed for all color types.</p>
+	 *
+	 * @return the bit depth of this image
+	 */
+	public short readBitDepth() {
 		return this.getUnsignedByte(8);
 	}
 
-	/** */
-	public short getColorType() {
+	/**
+	 * Reads the color type for this image, which defines the PNG
+	 * image type.
+	 *
+	 * <p>Valid values are 0, 2, 3, 4 and 6.</p>
+	 *
+	 * @return the color type of this image
+	 */
+	public short readColorType() {
 		return this.getUnsignedByte(9);
 	}
 
-	/** */
-	public short getCompression() {
+	/**
+	 * Reads the compression method for this image, indicates the
+	 * method used to compress the image data. Only compression
+	 * method 0 (deflate/inflate compression with a sliding
+	 * window of at most 32768 bytes) is defined in the PNG
+	 * specification.
+	 *
+	 * @return the compression method of this image
+	 */
+	public short readCompression() {
 		return this.getUnsignedByte(10);
 	}
 
-	/** */
-	public short getFilter() {
+	/**
+	 * Reads the filter method for this image, indicates the
+	 * preprocessing method applied to the image data before
+	 * compression.
+	 *
+	 * @return the filter method of this image
+	 */
+	public short readFilter() {
 		return this.getUnsignedByte(11);
 	}
 
-	/** */
-	public short getInterlace() {
+	/**
+	 * Reads the interlace method for this image, indicates the
+	 * transmission order of the image data.
+	 *
+	 * @return the interlace method of this image
+	 */
+	public short readInterlace() {
 		return this.getUnsignedByte(12);
 	}
 
-	/** */
-	public void setInterlace(byte interlace) {
+	/**
+	 * Writes the interlace method for this image, indicates the
+	 * transmission order of the image data.
+	 *
+	 * @param interlace the interlace method of this image
+	 */
+	public void writeInterlace(final byte interlace) {
 		this.data[12] = interlace;
 	}
+	//#endregion IHDR properties
 
 	/** */
 	public long getUnsignedInt(int offset) {
@@ -162,13 +219,13 @@ public final class PngChunk {
 		StringBuilder result = new StringBuilder();
 		result.append('[').append(this.typeName()).append(']').append('\n');
 		if (type == PngChunk.IMAGE_HEADER) {
-			result.append("Size:        ").append(this.getWidth()).append('x').append(this.getHeight()).append('\n');
-			result.append("Bit depth:   ").append(this.getBitDepth()).append('\n');
-			result.append("Image type:  ").append(this.getColorType()).append(" (").append(PngImageType.forColorType(this.getColorType())).append(")\n");
-			result.append("Color type:  ").append(this.getColorType()).append('\n');
-			result.append("Compression: ").append(this.getCompression()).append('\n');
-			result.append("Filter:      ").append(this.getFilter()).append('\n');
-			result.append("Interlace:   ").append(this.getInterlace());
+			result.append("Size:        ").append(this.readWidth()).append('x').append(this.readHeight()).append('\n');
+			result.append("Bit depth:   ").append(this.readBitDepth()).append('\n');
+			result.append("Image type:  ").append(this.readColorType()).append(" (").append(PngImageType.forColorType(this.readColorType())).append(")\n");
+			result.append("Color type:  ").append(this.readColorType()).append('\n');
+			result.append("Compression: ").append(this.readCompression()).append('\n');
+			result.append("Filter:      ").append(this.readFilter()).append('\n');
+			result.append("Interlace:   ").append(this.readInterlace());
 		}
 		if (type == PngChunk.TEXTUAL_DATA) {
 			result.append("Text:        ").append(new String(this.data));

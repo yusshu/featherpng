@@ -83,7 +83,7 @@ public class PngLayerer extends PngProcessor {
 
 				final PngChunk newChunk = new PngChunk(chunk.type(), bytes.toByteArray());
 				if (chunk.type() == PngChunk.IMAGE_HEADER) {
-					newChunk.setInterlace((byte) 0);
+					newChunk.writeInterlace((byte) 0);
 				}
 				result.addChunk(newChunk);
 			}

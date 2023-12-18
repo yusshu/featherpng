@@ -150,11 +150,11 @@ public final class PngImage {
 	public void addChunk(PngChunk chunk) {
 		switch (chunk.type()) {
 			case PngChunk.IMAGE_HEADER:
-				this.width = chunk.getWidth();
-				this.height = chunk.getHeight();
-				this.bitDepth = chunk.getBitDepth();
-				this.colorType = chunk.getColorType();
-				this.interlace = chunk.getInterlace();
+				this.width = chunk.readWidth();
+				this.height = chunk.readHeight();
+				this.bitDepth = chunk.readBitDepth();
+				this.colorType = chunk.readColorType();
+				this.interlace = chunk.readInterlace();
 				break;
 
 			case PngChunk.PALETTE:
