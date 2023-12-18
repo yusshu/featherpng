@@ -206,8 +206,12 @@ public final class PngChunk {
 	/** */
 	public long crc() {
 		CRC32 crc32 = new CRC32();
+		// update with the 4 bytes of type
+		crc32.update(this.type >> 24);
+		crc32.update(this.type >> 16);
+		crc32.update(this.type >> 8);
 		crc32.update(this.type);
-		crc32.update(this.data, 0, this.data.length);
+		crc32.update(this.data);
 		return crc32.getValue();
 	}
 

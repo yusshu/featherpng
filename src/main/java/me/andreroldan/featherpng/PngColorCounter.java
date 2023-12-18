@@ -75,7 +75,7 @@ public class PngColorCounter extends PngProcessor {
 		final List<PngPixel> results = getMergedColors(image, colors, start);
 
 		final long elapsed = System.currentTimeMillis() - start;
-		colorCounterResult = new ColorCounterResult(image.getFileName(), width, height, colors.size(), results, elapsed);
+		colorCounterResult = new ColorCounterResult(width, height, colors.size(), results, elapsed);
 	}
 
 	private List<PngPixel> getColors(PngImage original, List<byte[]> rows, long start) throws IOException {
@@ -220,15 +220,13 @@ public class PngColorCounter extends PngProcessor {
 	 * Holds image processing info
 	 */
 	public static class ColorCounterResult {
-		private final String fileName;
 		private final long width;
 		private final long height;
 		private final int totalColors;
 		private final List<PngPixel> dominantColors;
 		private final long elapsed;
 
-		public ColorCounterResult(String fileName, long width, long height, int totalColors, List<PngPixel> dominantColors, long elapsed) {
-			this.fileName = fileName;
+		public ColorCounterResult(long width, long height, int totalColors, List<PngPixel> dominantColors, long elapsed) {
 			this.width = width;
 			this.height = height;
 			this.totalColors = totalColors;
@@ -238,16 +236,13 @@ public class PngColorCounter extends PngProcessor {
 
 		@Override
 		public String toString() {
-			return "Filename: " + fileName + " " + width + "x" + height
+			return "Filename: " + " " + width + "x" + height
 					+ "\nCandidates: " + totalColors
 					+ "\nDominant Colors: " + dominantColors.size()
 					+ "\nColors: " + dominantColors.toString()
 					+ "\nElapsed: " + elapsed + "ms\n";
 		}
 
-		public String getFileName() {
-			return fileName;
-		}
 		public long getWidth() {
 			return width;
 		}

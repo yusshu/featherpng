@@ -35,27 +35,6 @@ public final class PngOptimizer extends PngProcessor {
 	}
 
 	/** */
-	public void optimize(PngImage image, String outputFileName, boolean removeGamma, Integer compressionLevel) throws IOException {
-		final PngImage optimized = optimize(image, removeGamma, compressionLevel);
-
-		final ByteArrayOutputStream optimizedBytes = new ByteArrayOutputStream();
-		final long optimizedSize = optimized.writeDataOutputStream(optimizedBytes).size();
-
-		final File originalFile = new File(image.getFileName());
-		final long originalFileSize = originalFile.length();
-
-		final byte[] optimalBytes = (optimizedSize < originalFileSize)
-				? optimizedBytes.toByteArray() : getFileBytes(originalFile, originalFileSize);
-
-		final File exported = optimized.export(outputFileName, optimalBytes);
-
-		final long optimizedFileSize = exported.length();
-		final String dataUri = (generateDataUriCss) ? pngCompressionHandler.encodeBytes(optimalBytes) : null;
-
-		results.add(new OptimizerResult(image.getFileName(), originalFileSize, optimizedFileSize, image.width(), image.height(), dataUri));
-	}
-
-	/** */
 	public PngImage optimize(PngImage image) throws IOException {
 		return optimize(image, false, null);
 	}

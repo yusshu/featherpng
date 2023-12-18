@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  */
 class PngReaderTest {
-
 	@Test
 	void getRGBA8() throws Exception {
 		final List<String> files = Arrays.asList(
