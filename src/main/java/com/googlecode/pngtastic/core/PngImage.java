@@ -6,12 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,88 +20,75 @@ import java.util.List;
  *
  * @author rayvanderborght
  */
-public class PngImage {
-
+public final class PngImage {
 	public static final long SIGNATURE = 0x89504e470d0a1a0aL;
 
 	private String fileName;
-	public String getFileName() { return this.fileName; }
-	public void setFileName(String fileName) { this.fileName = fileName; }
-
-	private List<PngChunk> chunks = new ArrayList<>();
-	public List<PngChunk> getChunks() { return this.chunks; }
+	private final List<PngChunk> chunks = new ArrayList<>();
 
 	private long width;
-	public long getWidth() { return this.width; }
-
 	private long height;
-	public long getHeight() { return this.height; }
 
 	private short bitDepth;
-	public short getBitDepth() { return this.bitDepth; }
-
 	private short colorType;
-	public short getColorType() { return this.colorType; }
-
 	private short interlace;
-	public short getInterlace() { return this.interlace; }
-	public void setInterlace(short interlace) { this.interlace = interlace; }
 
 	private PngChunk palette;
-	public PngChunk getPalette() { return palette; }
-
 	private PngImageType imageType;
+
+	public static PngImage read(final InputStream ins) throws IOException {
+		PngImage image = new PngImage();
+		DataInputStream dis = new DataInputStream(ins);
+		readSignature(dis);
+
+		int length;
+		PngChunk chunk;
+
+		do {
+			length = image.getChunkLength(dis);
+
+			byte[] type = image.getChunkType(dis);
+			byte[] data = image.getChunkData(dis, length);
+			long crc = image.getChunkCrc(dis);
+
+			chunk = new PngChunk(type, data);
+
+			if (!chunk.verifyCRC(crc)) {
+				throw new PngException("Corrupted file, crc check failed");
+			}
+
+			image.addChunk(chunk);
+		} while (length > 0 && !PngChunk.IMAGE_TRAILER.equals(chunk.getTypeString()));
+		return image;
+	}
+
+	public static PngImage read(final byte[] bytes) throws IOException {
+		return read(new ByteArrayInputStream(bytes));
+	}
+
+	public static PngImage read(final Path path) throws IOException {
+		try (final InputStream input = new BufferedInputStream(Files.newInputStream(path))) {
+			return read(input);
+		}
+	}
 
 	/** */
 	public PngImage() {
 	}
 
-	/** */
-	public PngImage(String fileName) throws FileNotFoundException {
-		this(new BufferedInputStream(new FileInputStream(fileName)));
-		this.fileName = fileName;
-	}
+	public String getFileName() { return this.fileName; }
 
-	/** */
-	public PngImage(byte[] bytes) {
-		this(new ByteArrayInputStream(bytes));
-	}
+	public List<PngChunk> getChunks() { return this.chunks; }
 
-	/** */
-	public PngImage(InputStream ins) {
-		try {
-			DataInputStream dis = new DataInputStream(ins);
-			readSignature(dis);
+	public long getWidth() { return this.width; }
+	public long getHeight() { return this.height; }
 
-			int length;
-			PngChunk chunk;
+	public short getBitDepth() { return this.bitDepth; }
+	public short getColorType() { return this.colorType; }
 
-			do {
-				length = getChunkLength(dis);
-
-				byte[] type = getChunkType(dis);
-				byte[] data = getChunkData(dis, length);
-				long crc = getChunkCrc(dis);
-
-				chunk = new PngChunk(type, data);
-
-//				log.debug("chunk: " + chunk.getTypeString());
-//				if ("pHYs".equals(chunk.getTypeString())) {
-//					for (byte x : chunk.getData())
-//						log.debug("data: " + x + "," + String.format("%x", x));
-//				}
-
-				if (!chunk.verifyCRC(crc)) {
-					throw new PngException("Corrupted file, crc check failed");
-				}
-
-				addChunk(chunk);
-			} while (length > 0 && !PngChunk.IMAGE_TRAILER.equals(chunk.getTypeString()));
-
-		} catch (IOException e) {
-			throw new PngException("Error: " + e.getMessage(), e);
-		}
-	}
+	public short getInterlace() { return this.interlace; }
+	public void setInterlace(short interlace) { this.interlace = interlace; }
+	public PngChunk getPalette() { return palette; }
 
 	/** */
 	public File export(String fileName, byte[] bytes) throws IOException {

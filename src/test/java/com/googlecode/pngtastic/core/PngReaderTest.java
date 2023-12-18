@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,7 +78,7 @@ class PngReaderTest {
 		);
 
 		for (final String file : files) {
-			final PngImage image = new PngImage("images/optimizer/pngsuite/" + file);
+			final PngImage image = PngImage.read(Paths.get("images/optimizer/pngsuite/" + file));
 			System.out.println(file);
 
 			byte[] data = new PngReader().readRGBA8(image);

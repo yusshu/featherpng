@@ -22,7 +22,7 @@ public class PngReader extends PngProcessor {
 
 	public static byte[] readRGBA8(final byte[] image) {
 		try {
-			return new PngReader().readRGBA8(new PngImage(image));
+			return new PngReader().readRGBA8(PngImage.read(image));
 		} catch (final IOException e) {
 			throw new PngException(e);
 		}
