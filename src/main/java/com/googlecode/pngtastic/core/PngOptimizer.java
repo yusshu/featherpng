@@ -116,19 +116,19 @@ public final class PngOptimizer extends PngProcessor {
 			bestFilterType = PngFilterType.ADAPTIVE;
 		}
 
-		final PngChunk imageChunk = new PngChunk(PngChunk.IMAGE_DATA.getBytes(), deflatedImageData);
+		final PngChunk imageChunk = new PngChunk(PngChunk.IMAGE_DATA, deflatedImageData);
 		result.addChunk(imageChunk);
 
 		// finish it
 		while (chunk != null) {
-			if (chunk.isCritical() && !PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
-				ByteArrayOutputStream bytes = new ByteArrayOutputStream(chunk.getLength());
+			if (chunk.isCritical() && chunk.type() != PngChunk.IMAGE_DATA) {
+				ByteArrayOutputStream bytes = new ByteArrayOutputStream(chunk.length());
 				DataOutputStream data = new DataOutputStream(bytes);
 
-				data.write(chunk.getData());
+				data.write(chunk.data());
 				data.close();
 
-				PngChunk newChunk = new PngChunk(chunk.getType(), bytes.toByteArray());
+				PngChunk newChunk = new PngChunk(chunk.type(), bytes.toByteArray());
 				result.addChunk(newChunk);
 			}
 			chunk = itChunks.hasNext() ? itChunks.next() : null;
@@ -136,8 +136,8 @@ public final class PngOptimizer extends PngProcessor {
 
 		// make sure we have the IEND chunk
 		final List<PngChunk> chunks = result.getChunks();
-		if (chunks != null && !PngChunk.IMAGE_TRAILER.equals(chunks.get(chunks.size() - 1).getTypeString())) {
-			result.addChunk(new PngChunk(PngChunk.IMAGE_TRAILER.getBytes(), new byte[] { }));
+		if (chunks != null && chunks.get(chunks.size() - 1).type() != PngChunk.IMAGE_TRAILER) {
+			result.addChunk(new PngChunk(PngChunk.IMAGE_TRAILER, new byte[] { }));
 		}
 
 		return result;

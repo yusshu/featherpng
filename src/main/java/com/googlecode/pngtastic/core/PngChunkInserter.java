@@ -21,7 +21,7 @@ public class PngChunkInserter {
 	 */
 	private static final byte[] dpi300 = new byte[] { 0, 0, 46, 35, 0, 0, 46, 35, 1 };
 
-	public static final PngChunk dpi300Chunk = new PngChunk(PngChunk.PHYSICAL_PIXEL_DIMENSIONS.getBytes(), dpi300);
+	public static final PngChunk dpi300Chunk = new PngChunk(PngChunk.PHYSICAL_PIXEL_DIMENSIONS, dpi300);
 
 	public byte[] insert(PngImage image, PngChunk chunk) throws IOException {
 		// add it after the header chunk

@@ -37,11 +37,11 @@ public abstract class PngProcessor {
 	protected PngByteArrayOutputStream getInflatedImageData(PngChunk chunk, Iterator<PngChunk> itChunks)
 			throws IOException {
 
-		final PngByteArrayOutputStream imageBytes = new PngByteArrayOutputStream(chunk == null ? 0 : chunk.getLength());
+		final PngByteArrayOutputStream imageBytes = new PngByteArrayOutputStream(chunk == null ? 0 : chunk.length());
 		try (final DataOutputStream imageData = new DataOutputStream(imageBytes)) {
 			while (chunk != null) {
-				if (PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
-					imageData.write(chunk.getData());
+				if (chunk.type() == PngChunk.IMAGE_DATA) {
+					imageData.write(chunk.data());
 				} else {
 					break;
 				}
@@ -95,17 +95,17 @@ public abstract class PngProcessor {
 		PngChunk chunk = null;
 		while (itChunks.hasNext()) {
 			chunk = itChunks.next();
-			if (PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
+			if (chunk.type() == PngChunk.IMAGE_DATA) {
 				break;
 			}
 
 			if (result != null && chunk.isRequired()) {
-				if (removeGamma && PngChunk.IMAGE_GAMA.equalsIgnoreCase(chunk.getTypeString())) {
+				if (removeGamma && chunk.type() == PngChunk.IMAGE_GAMA) {
 					continue;
 				}
 
-				PngChunk newChunk = new PngChunk(chunk.getType(), chunk.getData().clone());
-				if (PngChunk.IMAGE_HEADER.equals(chunk.getTypeString())) {
+				PngChunk newChunk = new PngChunk(chunk.type(), chunk.data().clone());
+				if (chunk.type() == PngChunk.IMAGE_HEADER) {
 					newChunk.setInterlace((byte) 0);
 				}
 				result.addChunk(newChunk);

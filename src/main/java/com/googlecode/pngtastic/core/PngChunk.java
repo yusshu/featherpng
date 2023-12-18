@@ -1,6 +1,5 @@
 package com.googlecode.pngtastic.core;
 
-import java.io.UnsupportedEncodingException;
 import java.util.zip.CRC32;
 
 /**
@@ -8,60 +7,72 @@ import java.util.zip.CRC32;
  *
  * @author rayvanderborght
  */
-public class PngChunk {
+public final class PngChunk {
+	/* critical chunks */
+	public static final int IMAGE_HEADER    = 0x49484452; // IHDR
+	public static final int PALETTE			= 0x504C5445; // PLTE
+	public static final int IMAGE_DATA		= 0x49444154; // IDAT
+	public static final int IMAGE_TRAILER	= 0x49454e44; // IEND
 
-	/** critical chunks */
-	public static final String IMAGE_HEADER		= "IHDR";
-	public static final String PALETTE			= "PLTE";
-	public static final String IMAGE_DATA		= "IDAT";
-	public static final String IMAGE_TRAILER	= "IEND";
+	/* ancilliary chunks */
+	public static final int TRANSPARENCY					= 0x74524e53; // tRNS
+	public static final int COLOR_SPACE_INFO				= 0x6348524d; // cHRM
+	public static final int IMAGE_GAMA					= 0x67414d41; // gAMA
+	public static final int EMBEDDED_ICCP_PROFILE		= 0x69434350; // iCCP
+	public static final int SIGNIFICANT_BITS				= 0x73424954; // sBIT
+	public static final int STANDARD_RGB					= 0x73524742; // sRGB
+	public static final int TEXTUAL_DATA					= 0x74455874; // tEXt
+	public static final int COMPRESSED_TEXTUAL_DATA		= 0x7a545874; // zTXt
+	public static final int INTERNATIONAL_TEXTUAL_DATA	= 0x69545874; // iTXt
+	public static final int BACKGROUND_COLOR				= 0x624b4744; // bKGD
+	public static final int IMAGE_HISTOGRAM				= 0x68495354; // hIST
+	public static final int PHYSICAL_PIXEL_DIMENSIONS	= 0x70485973; // pHYs
+	public static final int SUGGESTED_PALETTE			= 0x73504c54; // sPLT
+	public static final int IMAGE_LAST_MODIFICATION_TIME	= 0x74494d45; // tIME
 
-	/** ancilliary chunks */
-	public static final String TRANSPARENCY					= "TRNS";
-	public static final String COLOR_SPACE_INFO				= "CHRM";
-	public static final String IMAGE_GAMA					= "GAMA";
-	public static final String EMBEDDED_ICCP_PROFILE		= "ICCP";
-	public static final String SIGNIFICANT_BITS				= "SBIT";
-	public static final String STANDARD_RGB					= "SRGB";
-	public static final String TEXTUAL_DATA					= "TEXT";
-	public static final String COMPRESSED_TEXTUAL_DATA		= "ZTXT";
-	public static final String INTERNATIONAL_TEXTUAL_DATA	= "ITXT";
-	public static final String BACKGROUND_COLOR				= "BKGD";
-	public static final String IMAGE_HISTOGRAM				= "HIST";
-	public static final String PHYSICAL_PIXEL_DIMENSIONS	= "pHYs";
-	public static final String SUGGESTED_PALETTE			= "SPLT";
-	public static final String IMAGE_LAST_MODIFICATION_TIME	= "TIME";
-
-	private final byte[] type;
+	private final int type;
 	private final byte[] data;
 
 	/** */
-	public PngChunk(byte[] type, byte[] data) {
+	public PngChunk(int type, byte[] data) {
 		this.type = type;
 		this.data = data;
 	}
 
-	/** */
-	public String getTypeString() {
-		try {
-			return new String(this.type, "UTF8");
-		} catch (UnsupportedEncodingException e) {
-			return "";
-		}
+	/**
+	 * Returns this PNG chunk type name, which is a four-letter
+	 * ASCII string. Mostly human-readable.
+	 *
+	 * @return the type name of this PNG chunk
+	 */
+	public String typeName() {
+		final char c1 = (char) ((this.type >> 24) & 0xff);
+		final char c2 = (char) ((this.type >> 16) & 0xff);
+		final char c3 = (char) ((this.type >> 8) & 0xff);
+		final char c4 = (char) (this.type & 0xff);
+		return new String(new char[] { c1, c2, c3, c4 });
 	}
 
-	/** */
-	public byte[] getType() {
+	/**
+	 * Returns this PNG chunk type, which is one of the
+	 * static constants in this class.
+	 *
+	 * <p>Example: {@link #IMAGE_HEADER}, {@link #IMAGE_DATA},
+	 * {@link #IMAGE_TRAILER}, etc.</p>
+	 *
+	 * @return the type of this PNG chunk
+	 */
+	public int type() {
 		return this.type;
 	}
 
 	/** */
-	public byte[] getData() {
+	public byte[] data() {
 		return this.data;
 	}
 
 	/** */
-	public int getLength() {
+	public int length() {
 		return this.data.length;
 	}
 
@@ -122,32 +133,24 @@ public class PngChunk {
 
 	/** */
 	public boolean isCritical() {
-		String type = this.getTypeString().toUpperCase();
-		return type.equals(IMAGE_HEADER)
-			|| type.equals(PALETTE)
-			|| type.equals(IMAGE_DATA)
-			|| type.equals(IMAGE_TRAILER);
+		return type == IMAGE_HEADER || type == PALETTE || type == IMAGE_DATA || type == IMAGE_TRAILER;
 	}
 
 	/** */
 	public boolean isRequired() {
-		return this.isCritical()
-			|| TRANSPARENCY.equals(this.getTypeString().toUpperCase())
-			|| IMAGE_GAMA.equals(this.getTypeString().toUpperCase())
-			|| COLOR_SPACE_INFO.equals(this.getTypeString().toUpperCase());
+		return this.isCritical() || type == TRANSPARENCY || type == IMAGE_GAMA || type == COLOR_SPACE_INFO;
 	}
 
 	/** */
 	public boolean verifyCRC(long crc) {
-		return (this.getCRC() == crc);
+		return (this.crc() == crc);
 	}
 
 	/** */
-	public long getCRC() {
+	public long crc() {
 		CRC32 crc32 = new CRC32();
 		crc32.update(this.type);
-		crc32.update(this.data);
-
+		crc32.update(this.data, 0, this.data.length);
 		return crc32.getValue();
 	}
 
@@ -157,8 +160,8 @@ public class PngChunk {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-		result.append('[').append(this.getTypeString()).append(']').append('\n');
-		if (PngChunk.IMAGE_HEADER.equals(this.getTypeString().toUpperCase())) {
+		result.append('[').append(this.typeName()).append(']').append('\n');
+		if (type == PngChunk.IMAGE_HEADER) {
 			result.append("Size:        ").append(this.getWidth()).append('x').append(this.getHeight()).append('\n');
 			result.append("Bit depth:   ").append(this.getBitDepth()).append('\n');
 			result.append("Image type:  ").append(this.getColorType()).append(" (").append(PngImageType.forColorType(this.getColorType())).append(")\n");
@@ -167,17 +170,17 @@ public class PngChunk {
 			result.append("Filter:      ").append(this.getFilter()).append('\n');
 			result.append("Interlace:   ").append(this.getInterlace());
 		}
-		if (PngChunk.TEXTUAL_DATA.equals(this.getTypeString().toUpperCase())) {
+		if (type == PngChunk.TEXTUAL_DATA) {
 			result.append("Text:        ").append(new String(this.data));
 		}
-		if (PngChunk.IMAGE_DATA.equals(this.getTypeString().toUpperCase())) {
+		if (type == PngChunk.IMAGE_DATA) {
 			result.append("Image Data:  ")
-				.append("length=").append(this.getLength()).append(", data=");
+				.append("length=").append(this.length()).append(", data=");
 
 //			for (byte b : this.data)
 //				result.append(String.format("%x", b));
 
-			result.append(", crc=").append(this.getCRC());
+			result.append(", crc=").append(this.crc());
 		}
 
 		return result.toString();

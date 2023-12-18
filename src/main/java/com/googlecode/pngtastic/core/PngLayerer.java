@@ -46,7 +46,7 @@ public class PngLayerer extends PngProcessor {
 
 		final byte[] imageResult = pngCompressionHandler.deflate(serialize(newImageScanlines), compressionLevel, concurrent);
 
-		final PngChunk imageChunk = new PngChunk(PngChunk.IMAGE_DATA.getBytes(), imageResult);
+		final PngChunk imageChunk = new PngChunk(PngChunk.IMAGE_DATA, imageResult);
 		result.addChunk(imageChunk);
 
 		processTailChunks(result, itBaseChunks, lastBaseChunk);
@@ -70,19 +70,19 @@ public class PngLayerer extends PngProcessor {
 		PngChunk chunk = null;
 		while (itChunks.hasNext()) {
 			chunk = itChunks.next();
-			if (PngChunk.IMAGE_DATA.equals(chunk.getTypeString())) {
+			if (chunk.type() == PngChunk.IMAGE_DATA) {
 				break;
 			}
 
 			if (chunk.isRequired()) {
-				final ByteArrayOutputStream bytes = new ByteArrayOutputStream(chunk.getLength());
+				final ByteArrayOutputStream bytes = new ByteArrayOutputStream(chunk.length());
 				final DataOutputStream data = new DataOutputStream(bytes);
 
-				data.write(chunk.getData());
+				data.write(chunk.data());
 				data.close();
 
-				final PngChunk newChunk = new PngChunk(chunk.getType(), bytes.toByteArray());
-				if (PngChunk.IMAGE_HEADER.equals(chunk.getTypeString())) {
+				final PngChunk newChunk = new PngChunk(chunk.type(), bytes.toByteArray());
+				if (chunk.type() == PngChunk.IMAGE_HEADER) {
 					newChunk.setInterlace((byte) 0);
 				}
 				result.addChunk(newChunk);
@@ -95,13 +95,13 @@ public class PngLayerer extends PngProcessor {
 	private PngChunk processTailChunks(PngImage result, Iterator<PngChunk> itBaseChunks, PngChunk lastBaseChunk) throws IOException {
 		while (lastBaseChunk != null) {
 			if (lastBaseChunk.isCritical()) {
-				final ByteArrayOutputStream bytes = new ByteArrayOutputStream(lastBaseChunk.getLength());
+				final ByteArrayOutputStream bytes = new ByteArrayOutputStream(lastBaseChunk.length());
 				final DataOutputStream data = new DataOutputStream(bytes);
 
-				data.write(lastBaseChunk.getData());
+				data.write(lastBaseChunk.data());
 				data.close();
 
-				final PngChunk newChunk = new PngChunk(lastBaseChunk.getType(), bytes.toByteArray());
+				final PngChunk newChunk = new PngChunk(lastBaseChunk.type(), bytes.toByteArray());
 				result.addChunk(newChunk);
 			}
 			lastBaseChunk = itBaseChunks.hasNext() ? itBaseChunks.next() : null;

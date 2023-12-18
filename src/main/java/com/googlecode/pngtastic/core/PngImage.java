@@ -21,7 +21,10 @@ import java.util.List;
  * @author rayvanderborght
  */
 public final class PngImage {
-	public static final long SIGNATURE = 0x89504e470d0a1a0aL;
+	// The first eight bytes of a PNG datastream always contain the following (decimal) values:
+	//     137  80  78  71  13  10  26  10
+	//      ?    P   N   G  \r  \n   ?  \n
+	public static final long SIGNATURE = 0x89504E470D0A1A0AL;
 
 	private String fileName;
 	private final List<PngChunk> chunks = new ArrayList<>();
@@ -39,16 +42,22 @@ public final class PngImage {
 	public static PngImage read(final InputStream ins) throws IOException {
 		PngImage image = new PngImage();
 		DataInputStream dis = new DataInputStream(ins);
-		readSignature(dis);
 
-		int length;
+		// read PNG signature
+		{
+			final long signature = dis.readLong();
+			if (signature != PngImage.SIGNATURE) {
+				throw new PngException("Bad png signature");
+			}
+		}
+
+		int len;
 		PngChunk chunk;
 
 		do {
-			length = image.getChunkLength(dis);
-
-			byte[] type = image.getChunkType(dis);
-			byte[] data = image.getChunkData(dis, length);
+			len = dis.readInt();
+			final int type = dis.readInt();
+			final byte[] data = image.getChunkData(dis, len);
 			long crc = image.getChunkCrc(dis);
 
 			chunk = new PngChunk(type, data);
@@ -58,7 +67,7 @@ public final class PngImage {
 			}
 
 			image.addChunk(chunk);
-		} while (length > 0 && !PngChunk.IMAGE_TRAILER.equals(chunk.getTypeString()));
+		} while (len > 0 && PngChunk.IMAGE_TRAILER != chunk.type());
 		return image;
 	}
 
@@ -119,11 +128,10 @@ public final class PngImage {
 		outs.writeLong(PngImage.SIGNATURE);
 
 		for (PngChunk chunk : chunks) {
-			outs.writeInt(chunk.getLength());
-			outs.write(chunk.getType());
-			outs.write(chunk.getData());
-			int i = (int)chunk.getCRC();
-			outs.writeInt(i);
+			outs.writeInt(chunk.length());
+			outs.writeInt(chunk.type());
+			outs.write(chunk.data());
+			outs.writeInt((int) chunk.crc());
 		}
 		outs.close();
 
@@ -132,7 +140,7 @@ public final class PngImage {
 
 	/** */
 	public void addChunk(PngChunk chunk) {
-		switch (chunk.getTypeString()) {
+		switch (chunk.type()) {
 			case PngChunk.IMAGE_HEADER:
 				this.width = chunk.getWidth();
 				this.height = chunk.getHeight();
@@ -156,8 +164,8 @@ public final class PngImage {
 
 			// Write all the IDAT data
 			for (PngChunk chunk : chunks) {
-				if (chunk.getTypeString().equals(PngChunk.IMAGE_DATA)) {
-					out.write(chunk.getData());
+				if (chunk.type() == PngChunk.IMAGE_DATA) {
+					out.write(chunk.data());
 				}
 			}
 			return out.toByteArray();
@@ -171,16 +179,6 @@ public final class PngImage {
 	public int getSampleBitCount() {
 		this.imageType = (this.imageType == null) ? PngImageType.forColorType(this.colorType) : this.imageType;
 		return this.imageType.channelCount() * this.bitDepth;
-	}
-
-	/* */
-	private int getChunkLength(DataInputStream ins) throws IOException {
-		return ins.readInt();
-	}
-
-	/* */
-	private byte[] getChunkType(InputStream ins) throws PngException {
-		return getChunkData(ins, 4);
 	}
 
 	/* */
@@ -203,13 +201,5 @@ public final class PngImage {
 		int i = ins.readInt();
 		long crc = i & 0x00000000ffffffffL; // Make it unsigned.
 		return crc;
-	}
-
-	/* */
-	private static void readSignature(DataInputStream ins) throws PngException, IOException {
-		long signature = ins.readLong();
-		if (signature != PngImage.SIGNATURE) {
-			throw new PngException("Bad png signature");
-		}
 	}
 }
