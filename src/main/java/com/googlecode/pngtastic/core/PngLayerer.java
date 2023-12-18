@@ -18,28 +18,14 @@ import java.util.List;
  * @author rayvanderborght
  */
 public class PngLayerer extends PngProcessor {
-
-	/** */
-	public PngLayerer() {
-		this(Logger.NONE);
-	}
-
-	/** */
-	public PngLayerer(String logLevel) {
-		super(logLevel);
-	}
-
 	/** */
 	public PngImage layer(PngImage baseImage, PngImage layerImage, Integer compressionLevel, boolean concurrent) throws IOException {
-		log.debug("=== LAYERING: " + baseImage.getFileName() + ", " + layerImage.getFileName() + " ===");
-		final long start = System.currentTimeMillis();
-
 		// FIXME: support low bit depth interlaced images
 		if (baseImage.getInterlace() == 1 && baseImage.getSampleBitCount() < 8) {
 			return baseImage;
 		}
 
-		final PngImage result = new PngImage(log);
+		final PngImage result = new PngImage();
 		result.setInterlace((short) 0);
 
 		final Iterator<PngChunk> itBaseChunks = baseImage.getChunks().iterator();
@@ -64,8 +50,6 @@ public class PngLayerer extends PngProcessor {
 		result.addChunk(imageChunk);
 
 		processTailChunks(result, itBaseChunks, lastBaseChunk);
-
-		log.debug("Layered in %d milliseconds", (System.currentTimeMillis() - start));
 
 		return result;
 	}

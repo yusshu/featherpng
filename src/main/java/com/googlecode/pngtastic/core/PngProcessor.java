@@ -23,18 +23,15 @@ import java.util.zip.InflaterInputStream;
  */
 public abstract class PngProcessor {
 
-	protected final Logger log;
 	protected final PngFilterHandler pngFilterHandler;
 	protected final PngInterlaceHandler pngInterlaceHandler;
 
 	protected PngCompressionHandler pngCompressionHandler;
 
-	protected PngProcessor(String logLevel) {
-		this.log = new Logger(logLevel);
-		this.pngFilterHandler = new PngtasticFilterHandler(log);
-		this.pngInterlaceHandler = new PngtasticInterlaceHandler(log, pngFilterHandler);
-		this.pngCompressionHandler = new PngtasticCompressionHandler(log);
-
+	protected PngProcessor() {
+		this.pngFilterHandler = new PngtasticFilterHandler();
+		this.pngInterlaceHandler = new PngtasticInterlaceHandler(pngFilterHandler);
+		this.pngCompressionHandler = new PngtasticCompressionHandler();
 	}
 
 	protected PngByteArrayOutputStream getInflatedImageData(PngChunk chunk, Iterator<PngChunk> itChunks)
@@ -87,7 +84,8 @@ public abstract class PngProcessor {
 				rows.add(row);
 				previousRow = row.clone();
 			} catch (PngException e) {
-				log.error("Error: %s", e.getMessage());
+				System.err.println("Error: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 		return rows;
@@ -123,6 +121,6 @@ public abstract class PngProcessor {
 		for (byte b : inflatedImageData) {
 			result.append(String.format("%2x|", b));
 		}
-		log.debug(result.toString());
+		System.err.println(result);
 	}
 }

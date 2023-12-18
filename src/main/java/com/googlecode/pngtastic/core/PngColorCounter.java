@@ -32,35 +32,26 @@ public class PngColorCounter extends PngProcessor {
 	public ColorCounterResult getResult() { return colorCounterResult; }
 
 	public PngColorCounter() {
-		this(Logger.NONE, 0.01D, 0.01D, 30, 0L);
+		this(0.01D, 0.01D, 30, 0L);
 	}
 
 	public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha) {
-		this(Logger.NONE, distThreshold, freqThreshold, minAlpha, 0L);
+		this(distThreshold, freqThreshold, minAlpha, 0L);
 	}
 
 	public PngColorCounter(double distThreshold, double freqThreshold, int minAlpha, long timeout) {
-		this(Logger.NONE, distThreshold, freqThreshold, minAlpha, timeout);
-	}
-
-	public PngColorCounter(String logLevel, double distThreshold, double freqThreshold, int minAlpha, long timeout) {
-		super(logLevel);
-
 		this.distThreshold = distThreshold;
 		this.freqThreshold = freqThreshold;
 		this.minAlpha = minAlpha;
 		this.timeout = timeout;
 
-		this.pngInterlaceHandler = new PngtasticInterlaceHandler(log, pngFilterHandler);
+		this.pngInterlaceHandler = new PngtasticInterlaceHandler(pngFilterHandler);
 	}
 
 	/** */
 	public void count(PngImage image) throws IOException {
-		log.debug("=== COUNTING ===");
-
 		// FIXME: support low bit depth interlaced images
 		if (image.getInterlace() == 1 && image.getSampleBitCount() < 8) {
-			log.debug("not supported");
 			return;
 		}
 
@@ -168,7 +159,6 @@ public class PngColorCounter extends PngProcessor {
 			}
 			y++;
 		}
-		log.debug("Full color count=%d", colors.size());
 
 		if (freqThreshold > 0) {
 			final int minFreq = (int) (original.getWidth() * original.getHeight() * freqThreshold);
@@ -179,7 +169,6 @@ public class PngColorCounter extends PngProcessor {
 				}
 			}
 		}
-		log.debug("Filtered color count=%d", colors.size());
 
 		final List<PngPixel> results = new ArrayList<>(colors.keySet());
 		for (PngPixel pixel : results) {

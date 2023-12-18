@@ -22,8 +22,6 @@ import java.util.List;
  */
 public class PngImage {
 
-	private final Logger log;
-
 	public static final long SIGNATURE = 0x89504e470d0a1a0aL;
 
 	private String fileName;
@@ -56,34 +54,21 @@ public class PngImage {
 
 	/** */
 	public PngImage() {
-		this.log = new Logger(Logger.NONE);
 	}
 
 	/** */
-	public PngImage(Logger log) {
-		this.log = log;
-	}
-
-	/** */
-	public PngImage(String fileName, String logLevel) throws FileNotFoundException {
-		this(new BufferedInputStream(new FileInputStream(fileName)), logLevel);
+	public PngImage(String fileName) throws FileNotFoundException {
+		this(new BufferedInputStream(new FileInputStream(fileName)));
 		this.fileName = fileName;
 	}
 
 	/** */
 	public PngImage(byte[] bytes) {
-		this(new ByteArrayInputStream(bytes), null);
+		this(new ByteArrayInputStream(bytes));
 	}
 
 	/** */
 	public PngImage(InputStream ins) {
-		this(ins, null);
-	}
-
-	/** */
-	public PngImage(InputStream ins, String logLevel) {
-		this(new Logger(logLevel));
-
 		try {
 			DataInputStream dis = new DataInputStream(ins);
 			readSignature(dis);
@@ -147,7 +132,6 @@ public class PngImage {
 		outs.writeLong(PngImage.SIGNATURE);
 
 		for (PngChunk chunk : chunks) {
-			log.debug("export: %s", chunk.toString());
 			outs.writeInt(chunk.getLength());
 			outs.write(chunk.getType());
 			outs.write(chunk.getData());

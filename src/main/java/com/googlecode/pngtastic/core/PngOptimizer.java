@@ -22,29 +22,20 @@ import java.util.Map.Entry;
  *
  * @author rayvanderborght
  */
-public class PngOptimizer extends PngProcessor {
-
+public final class PngOptimizer extends PngProcessor {
 	private boolean generateDataUriCss = false;
-	public void setGenerateDataUriCss(boolean generateDataUriCss) { this.generateDataUriCss = generateDataUriCss; }
-
 	private final List<OptimizerResult> results = new ArrayList<>();
-	public List<OptimizerResult> getResults() { return results; }
 
-	public PngOptimizer() {
-		this(Logger.NONE);
+	public List<OptimizerResult> getResults() {
+		return results;
 	}
 
-	public PngOptimizer(String logLevel) {
-		super(logLevel);
+	public void setGenerateDataUriCss(boolean generateDataUriCss) {
+		this.generateDataUriCss = generateDataUriCss;
 	}
 
 	/** */
-	public void optimize(PngImage image, String outputFileName, boolean removeGamma, Integer compressionLevel)
-			throws IOException {
-
-		log.debug("=== OPTIMIZING ===");
-
-		final long start = System.currentTimeMillis();
+	public void optimize(PngImage image, String outputFileName, boolean removeGamma, Integer compressionLevel) throws IOException {
 		final PngImage optimized = optimize(image, removeGamma, compressionLevel);
 
 		final ByteArrayOutputStream optimizedBytes = new ByteArrayOutputStream();
@@ -59,19 +50,6 @@ public class PngOptimizer extends PngProcessor {
 		final File exported = optimized.export(outputFileName, optimalBytes);
 
 		final long optimizedFileSize = exported.length();
-		final long time = System.currentTimeMillis() - start;
-
-		log.debug("Optimized in %d milliseconds, size %d", time, optimizedSize);
-		log.debug("Original length in bytes: %d (%s)", originalFileSize, image.getFileName());
-		log.debug("Final length in bytes: %d (%s)", optimizedFileSize, outputFileName);
-
-		final long fileSizeDifference = (optimizedFileSize <= originalFileSize)
-				? (originalFileSize - optimizedFileSize) : -(optimizedFileSize - originalFileSize);
-
-		log.info("%5.2f%% :%6dB ->%6dB (%5dB saved) - %s",
-				fileSizeDifference / Float.valueOf(originalFileSize) * 100,
-				originalFileSize, optimizedFileSize, fileSizeDifference, outputFileName);
-
 		final String dataUri = (generateDataUriCss) ? pngCompressionHandler.encodeBytes(optimalBytes) : null;
 
 		results.add(new OptimizerResult(image.getFileName(), originalFileSize, optimizedFileSize, image.getWidth(), image.getHeight(), dataUri));
@@ -89,7 +67,7 @@ public class PngOptimizer extends PngProcessor {
 			return image;
 		}
 
-		final PngImage result = new PngImage(log);
+		final PngImage result = new PngImage();
 		result.setInterlace((short) 0);
 
 		final Iterator<PngChunk> itChunks = image.getChunks().iterator();
@@ -110,7 +88,6 @@ public class PngOptimizer extends PngProcessor {
 		// apply each type of filtering
 		final Map<PngFilterType, List<byte[]>> filteredScanlines = new HashMap<>();
 		for (PngFilterType filterType : PngFilterType.standardValues()) {
-			log.debug("Applying filter: %s", filterType);
 			final List<byte[]> scanlines = copyScanlines(originalScanlines);
 			pngFilterHandler.applyFiltering(filterType, scanlines, image.getSampleBitCount());
 
@@ -133,8 +110,6 @@ public class PngOptimizer extends PngProcessor {
 		pngFilterHandler.applyAdaptiveFiltering(inflatedImageData, scanlines, filteredScanlines, image.getSampleBitCount());
 
 		final byte[] adaptiveImageData = pngCompressionHandler.deflate(inflatedImageData, compressionLevel, true);
-		log.debug("Original=%d, Adaptive=%d, %s=%d", image.getImageData().length, adaptiveImageData.length,
-				bestFilterType, (deflatedImageData == null) ? 0 : deflatedImageData.length);
 
 		if (deflatedImageData == null || adaptiveImageData.length < deflatedImageData.length) {
 			deflatedImageData = adaptiveImageData;
@@ -281,9 +256,9 @@ public class PngOptimizer extends PngProcessor {
 	public void setCompressor(String compressor, Integer iterations) {
 		if ("zopfli".equals(compressor)) {
 			if (iterations != null) {
-				pngCompressionHandler = new ZopfliCompressionHandler(log, iterations);
+				pngCompressionHandler = new ZopfliCompressionHandler(iterations);
 			} else {
-				pngCompressionHandler = new ZopfliCompressionHandler(log);
+				pngCompressionHandler = new ZopfliCompressionHandler();
 			}
 		}
 	}

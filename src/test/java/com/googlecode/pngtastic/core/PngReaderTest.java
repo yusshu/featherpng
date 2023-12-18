@@ -77,7 +77,7 @@ class PngReaderTest {
 		);
 
 		for (final String file : files) {
-			final PngImage image = new PngImage("images/optimizer/pngsuite/" + file, "none");
+			final PngImage image = new PngImage("images/optimizer/pngsuite/" + file);
 			System.out.println(file);
 
 			byte[] data = new PngReader().readRGBA8(image);

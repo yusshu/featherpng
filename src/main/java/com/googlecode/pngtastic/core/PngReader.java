@@ -14,16 +14,10 @@ import java.util.List;
  * @author rayvanderborght
  */
 public class PngReader extends PngProcessor {
-
 	private final PngInterlaceHandler pngInterlaceHandler;
 
 	public PngReader() {
-		this(Logger.NONE);
-	}
-
-	public PngReader(String logLevel) {
-		super(logLevel);
-		this.pngInterlaceHandler = new PngtasticInterlaceHandler(log, pngFilterHandler);
+		this.pngInterlaceHandler = new PngtasticInterlaceHandler(pngFilterHandler);
 	}
 
 	public static byte[] readRGBA8(final byte[] image) {
@@ -36,8 +30,6 @@ public class PngReader extends PngProcessor {
 
 	/** */
 	public byte[] readRGBA8(final PngImage image) throws IOException {
-		log.debug("=== READING ===");
-
 		// FIXME: support low bit depth interlaced images
 		if (image.getInterlace() == 1 && image.getSampleBitCount() < 8) {
 			throw new PngException("not supported");

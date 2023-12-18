@@ -1,6 +1,5 @@
 package com.googlecode.pngtastic.core.processing;
 
-import com.googlecode.pngtastic.core.Logger;
 import com.googlecode.pngtastic.core.processing.zopfli.Options;
 import com.googlecode.pngtastic.core.processing.zopfli.Zopfli;
 
@@ -18,15 +17,13 @@ public class ZopfliCompressionHandler implements PngCompressionHandler {
     private static final int DEFAULT_ITERATIONS = 15;
     private final Options options;
 
-    private final Logger log;
     private final Zopfli zopfli;
 
-    public ZopfliCompressionHandler(Logger log) {
-        this(log, DEFAULT_ITERATIONS);
+    public ZopfliCompressionHandler() {
+        this(DEFAULT_ITERATIONS);
     }
 
-    public ZopfliCompressionHandler(Logger log, int iterations) {
-        this.log = log;
+    public ZopfliCompressionHandler(int iterations) {
         zopfli = new Zopfli(8 * 1024 * 1024);
         options = new Options(Options.OutputFormat.ZLIB, Options.BlockSplitting.FIRST, iterations);
     }
@@ -38,8 +35,6 @@ public class ZopfliCompressionHandler implements PngCompressionHandler {
     public byte[] deflate(PngByteArrayOutputStream inflatedImageData, Integer compressionLevel, boolean concurrent) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         zopfli.compress(options, inflatedImageData.toByteArray(), byteArrayOutputStream);
-        log.debug("Compression strategy: zopfli, bytes=%d", byteArrayOutputStream.size());
-
         return byteArrayOutputStream.toByteArray();
     }
 

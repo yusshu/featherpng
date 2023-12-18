@@ -1,6 +1,5 @@
 package com.googlecode.pngtastic.core.processing;
 
-import com.googlecode.pngtastic.core.Logger;
 import com.googlecode.pngtastic.core.PngException;
 import com.googlecode.pngtastic.core.PngFilterType;
 
@@ -14,15 +13,6 @@ import java.util.Map;
  * @author rayvanderborght
  */
 public class PngtasticFilterHandler implements PngFilterHandler {
-
-	/** */
-	private final Logger log;
-
-	/** */
-	public PngtasticFilterHandler(Logger log) {
-		this.log = log;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -40,7 +30,8 @@ public class PngtasticFilterHandler implements PngFilterHandler {
 			try {
 				this.filter(scanline, previousRow, sampleBitCount);
 			} catch (PngException e) {
-				this.log.error("Error during filtering: %s", e.getMessage());
+				System.err.println("Error during filtering: " + e.getMessage());
+				e.printStackTrace();
 			}
 			previousRow = previous;
 		}

@@ -1,6 +1,5 @@
 package com.googlecode.pngtastic.core.processing;
 
-import com.googlecode.pngtastic.core.Logger;
 import com.googlecode.pngtastic.core.PngException;
 
 import java.util.ArrayList;
@@ -15,10 +14,7 @@ import java.util.List;
 public class PngtasticInterlaceHandler implements PngInterlaceHandler {
 
 	/** */
-	private final Logger log;
-
-	/** */
-	private PngFilterHandler pngFilterHandler;
+	private final PngFilterHandler pngFilterHandler;
 
 	/** */
 	private static final int[] interlaceRowOffset		= new int[] { 0, 0, 4, 0, 2, 0, 1 };
@@ -27,8 +23,7 @@ public class PngtasticInterlaceHandler implements PngInterlaceHandler {
 	private static final int[] interlaceColIncrement 	= new int[] { 8, 8, 4, 4, 2, 2, 1 };
 
 	/** */
-	public PngtasticInterlaceHandler(Logger log, PngFilterHandler pngFilterHandler) {
-		this.log = log;
+	public PngtasticInterlaceHandler(PngFilterHandler pngFilterHandler) {
 		this.pngFilterHandler = pngFilterHandler;
 	}
 
@@ -53,8 +48,6 @@ public class PngtasticInterlaceHandler implements PngInterlaceHandler {
 	 */
 	@Override
 	public List<byte[]> deInterlace(int width, int height, int sampleBitCount, PngByteArrayOutputStream inflatedImageData) {
-		log.debug("Deinterlacing");
-
 		final int sampleSize = Math.max(1, sampleBitCount / 8);
 		// final int sampleSize = sampleBitCount;//Math.max(1, sampleBitCount / 8);
 		final byte[][] rows = new byte[height][Double.valueOf(Math.ceil(width * sampleBitCount / 8D)).intValue() + 1];
@@ -78,7 +71,8 @@ public class PngtasticInterlaceHandler implements PngInterlaceHandler {
 				try {
 					pngFilterHandler.deFilter(row, previousRow, sampleBitCount);
 				} catch (PngException e) {
-					log.error("Error: %s", e.getMessage());
+					System.err.println("Error: " + e.getMessage());
+					e.printStackTrace();
 				}
 
 //				final int samples = (row.length * sampleSize - sampleSize) / sampleSize;
